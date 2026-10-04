@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JARVIS V6 - Gemini API Key</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07070c;--card:#11111a;--card2:#181826;--border:#262640;--accent:#7c5cff;--accent2:#00e5ff;--gemini:#8ab4f8;--text:#ececff;--muted:#8b8ba8;--green:#00ff9d;--yellow:#ffcc33;--red:#ff4a6a}
+*{margin:0;padding:0;box-sizing:border-box} body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif}
+.mono{font-family:'JetBrains Mono',monospace}
+header{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:rgba(7,7,12,0.95);backdrop-filter:blur(12px);z-index:20}
+.logo{display:flex;gap:8px;align-items:center}
+.logo-icon{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--accent),var(--gemini));display:grid;place-items:center;color:#000;font-weight:800;font-size:12px}
+.badge{font-size:8.5px;padding:4px 8px;border-radius:20px;background:var(--card2);border:1px solid var(--border)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--muted);display:inline-block;margin-right:4px}
+.dot.on{background:var(--red);box-shadow:0 0 8px var(--red);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.hero{display:grid;place-items:center;padding:14px 12px 6px;text-align:center}
+.orb-wrap{position:relative;width:130px;height:130px;display:grid;place-items:center}
+.orb{width:84px;height:84px;border-radius:50%;background:radial-gradient(circle at 35% 35%, var(--accent2), var(--accent));box-shadow:0 0 40px rgba(124,92,255,0.5);cursor:pointer;display:grid;place-items:center;font-size:22px;transition:0.2s}
+.orb.listening{transform:scale(1.1);box-shadow:0 0 70px rgba(124,92,255,0.8)}
+.orb.speaking{animation:speak 0.28s infinite alternate}
+@keyframes speak{0%{transform:scale(1.06)}100%{transform:scale(1.14)}}
+.pastilles{display:flex;gap:8px;margin-top:10px}
+.past{padding:6px 10px;border-radius:20px;background:var(--card2);border:1px solid var(--border);font-size:10px;color:var(--muted)}
+.past.on{border-color:var(--accent);color:var(--text);background:rgba(124,92,255,0.15)}
+.status{font-weight:800;font-size:14px;margin-top:8px;min-height:18px}
+.sub{font-size:10px;color:var(--muted);min-height:12px;margin-top:2px}
+.transcript{margin-top:8px;padding:8px 10px;background:var(--card);border:1px solid var(--border);border-radius:10px;min-width:280px;max-width:600px;width:92%;font-size:11px;min-height:32px}
+.layout{max-width:1280px;margin:0 auto;padding:10px 12px;display:grid;grid-template-columns:350px 1fr;gap:10px}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px}
+.card.gemini{border-color:var(--gemini);box-shadow:0 0 25px rgba(138,180,248,0.15)}
+.card h3{font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between}
+.input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:11px;outline:none;margin-top:4px}
+.input:focus{border-color:var(--accent)}
+.row{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.btn{padding:7px 10px;border-radius:8px;border:none;cursor:pointer;font-weight:700;font-size:10px;display:inline-flex;gap:4px;align-items:center}
+.btn-p{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000}
+.btn-gem{background:linear-gradient(135deg,var(--gemini),#aecbfa);color:#000}
+.btn-g{background:var(--card2);border:1px solid var(--border);color:var(--text)}
+.output{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px;white-space:pre-wrap;font-family:'JetBrains Mono';font-size:10.5px;line-height:1.5;min-height:60px;margin-top:6px}
+.help{padding:8px 10px;background:linear-gradient(135deg,rgba(124,92,255,0.06),rgba(138,180,248,0.06));border:1px solid rgba(124,92,255,0.12);border-radius:8px;font-size:10px;line-height:1.5;color:var(--muted);margin-top:6px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><div class="logo-icon">J</div><div><div style="font-weight:800;font-size:11px">JARVIS V6 GEMINI</div><div class="mono" style="font-size:7px;color:var(--muted)">CERVEAU GEMINI + GROQ + TAVILY</div></div></div>
+  <div style="display:flex;gap:5px"><div class="badge mono"><span id="liveDot" class="dot"></span><span id="liveLabel">MIC OFF</span></div><div class="badge mono" id="brainBadge">CERVEAU: REGEX</div><div class="badge mono" id="emailBadge">EMAIL: ?</div></div>
+</header>
+
+<div class="hero">
+  <div class="orb-wrap"><div id="orb" class="orb" onclick="toggleVoice()">🎙️</div></div>
+  <div id="status" class="status">Clique pour parler - Gemini va beaucoup mieux comprendre</div>
+  <div id="sub" class="sub">Dis "stop" pour couper • "oui envoie" pour confirmer</div>
+  <div class="pastilles"><div id="pastListen" class="past">🎧 Écoute</div><div id="pastThink" class="past">🧠 Gemini réfléchit</div><div id="pastSpeak" class="past">🔊 Répond</div></div>
+  <div id="transcript" class="transcript mono">En attente...</div>
+</div>
+
+<div class="layout">
+  <div>
+    <div class="card gemini">
+      <h3>✨ Cerveau Gemini - Clé API (NOUVEAU) <span class="mono" style="color:var(--gemini)">RECOMMANDÉ</span></h3>
+      <div style="font-size:10px;color:var(--muted);line-height:1.5;margin-bottom:6px">
+        <b style="color:var(--text)">C'est quoi ?</b> Gemini 1.5 Flash de Google comprend le français 10x mieux que mes regex. Il extrait tout seul : à qui, quoi, quand.<br>
+        <b>Comment avoir la clé gratuite :</b><br>
+        1. Va sur <span class="mono" style="color:var(--gemini)">aistudio.google.com/app/apikey</span><br>
+        2. Clique <b>Create API Key</b> > Copie la clé qui commence par <span class="mono">AIza...</span><br>
+        3. Colle-la ici, sauvegarde. C'est gratuit, 60 requêtes/min.
+      </div>
+      <input id="geminiKey" class="input" placeholder="Gemini API Key (AIza...) - colle ici">
+      <div class="row"><button class="btn btn-gem" onclick="saveGemini()">💾 Sauver Gemini</button><button class="btn btn-g" onclick="testGemini()">🧪 Tester Gemini</button><button class="btn btn-g" onclick="clearGemini()">Effacer</button></div>
+      <div id="geminiStatus" class="help">❌ Pas de clé Gemini - utilisation regex basique</div>
+    </div>
+
+    <div class="card">
+      <h3>🧠 Autres cerveaux + Recherche</h3>
+      <input id="groqKey" class="input" placeholder="Groq API Key (gsk_...) optionnel - fallback">
+      <input id="tavilyKey" class="input" placeholder="Tavily API Key (tvly-...) pour recherche temps réel">
+      <input id="porcupineKey" class="input" placeholder="Picovoice AccessKey pour wake word offline">
+      <div class="row"><button class="btn btn-p" onclick="saveBrain()">💾 Sauver autres</button></div>
+    </div>
+
+    <div class="card" style="border-color:var(--accent)">
+      <h3>📧 Emails réels + 📎 PJ <span class="mono" id="ejState">...</span></h3>
+      <input id="ejS" class="input" placeholder="EmailJS Service ID"><input id="ejT" class="input" placeholder="Template ID"><input id="ejK" class="input" placeholder="Public Key"><input id="customApi" class="input" placeholder="API perso Niveau 3 optionnel">
+      <input type="file" id="attach" class="input">
+      <div class="row"><button class="btn btn-p" onclick="saveAll()">💾 Sauver Email</button><button class="btn btn-g" onclick="testEJ()">🧪 Test envoi</button><button class="btn btn-g" onclick="unlockAudio()">🔊 Débloquer son</button></div>
+      <div id="cfgStatus" class="help">...</div>
+    </div>
+
+    <div class="card">
+      <h3>👥 Contacts + Todos</h3>
+      <div class="row"><input id="contactName" class="input" placeholder="Nom" style="flex:1"><input id="contactEmail" class="input" placeholder="Email" style="flex:1"><button class="btn btn-g" onclick="addContact()">+</button></div>
+      <div id="contactsList" class="help">Aucun contact</div>
+      <div class="row"><input id="todoInput" class="input" placeholder="Todo" style="flex:1"><button class="btn btn-g" onclick="addTodo()">+</button></div>
+      <div id="todoList" class="help">Aucun todo</div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <h3>💬 Conversation Gemini - comprends tout</h3>
+      <div style="display:flex;gap:6px"><input id="txt" class="input" placeholder="Ex: envoie à Marc le devis d'hier pour 3000€"><button class="btn btn-p" onclick="sendTxt()">Envoyer</button></div>
+      <div id="out" class="output">Prêt V6 Gemini. Si clé Gemini mise, je comprends le français naturel, les fautes, "à Marc", "le truc d'hier", "pour 3000 balles". Sans clé, je reste en regex.</div>
+      <div id="actionZone" style="margin-top:8px"></div>
+      <div class="help"><b>Exemples qui marchent beaucoup mieux avec Gemini :</b><br>
+      • "envoie à Marc le truc d'hier pour le devis" → il trouve Marc dans contacts + note d'hier<br>
+      • "envoie un mail à test at gmail point com pour dire bonjour avec le fichier" → corrige email + PJ<br>
+      • "cherche Mistral et fais un résumé pour LinkedIn" → recherche Tavily + rédaction<br>
+      • "ajoute un PS : merci beaucoup" → contexte du mail précédent<br>
+      • "non je voulais dire Paul pas Marc" → apprentissage<br>
+      Dis "stop" pour couper ma voix, "oui envoie" pour confirmer.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let recog=null, listening=false, awaitingConfirm=null, lastDraft=null, lastContext={}, contacts=JSON.parse(localStorage.getItem('jarvis_contacts')||'[]'), todos=JSON.parse(localStorage.getItem('jarvis_todos')||'[]');
+const outEl=document.getElementById('out'), transEl=document.getElementById('transcript'), statusEl=document.getElementById('status'), orbEl=document.getElementById('orb'), liveDot=document.getElementById('liveDot'), liveLabel=document.getElementById('liveLabel');
+
+function log(m){ console.log(m); }
+function saveGemini(){ localStorage.setItem('gemini_key', document.getElementById('geminiKey').value.trim()); updateGeminiStatus(); alert('Gemini sauvegardé'); }
+function clearGemini(){ localStorage.removeItem('gemini_key'); document.getElementById('geminiKey').value=''; updateGeminiStatus(); }
+function saveAll(){ localStorage.setItem('ej_s',document.getElementById('ejS').value.trim()); localStorage.setItem('ej_t',document.getElementById('ejT').value.trim()); localStorage.setItem('ej_k',document.getElementById('ejK').value.trim()); localStorage.setItem('custom_api',document.getElementById('customApi').value.trim()); updateEmailStatus(); alert('Email sauvegardé'); }
+function saveBrain(){ localStorage.setItem('groq_key',document.getElementById('groqKey').value.trim()); localStorage.setItem('tavily_key',document.getElementById('tavilyKey').value.trim()); localStorage.setItem('porcupine_key',document.getElementById('porcupineKey').value.trim()); alert('Cerveaux sauvegardés'); }
+function loadAll(){
+  document.getElementById('geminiKey').value=localStorage.getItem('gemini_key')||''; document.getElementById('groqKey').value=localStorage.getItem('groq_key')||''; document.getElementById('tavilyKey').value=localStorage.getItem('tavily_key')||''; document.getElementById('porcupineKey').value=localStorage.getItem('porcupine_key')||''; document.getElementById('ejS').value=localStorage.getItem('ej_s')||''; document.getElementById('ejT').value=localStorage.getItem('ej_t')||''; document.getElementById('ejK').value=localStorage.getItem('ej_k')||''; document.getElementById('customApi').value=localStorage.getItem('custom_api')||'';
+  renderContacts(); renderTodos(); updateGeminiStatus(); updateEmailStatus();
+}
+function updateGeminiStatus(){
+  const k=localStorage.getItem('gemini_key'); const el=document.getElementById('geminiStatus'), badge=document.getElementById('brainBadge');
+  if(k){ el.textContent='✅ Gemini configuré - compréhension intelligente FR active (beaucoup mieux)'; el.style.borderColor='var(--gemini)'; badge.textContent='CERVEAU: GEMINI ✨'; badge.style.color='var(--gemini)'; }
+  else if(localStorage.getItem('groq_key')){ el.textContent='⚠️ Groq configuré (fallback) - moins bon en FR que Gemini'; badge.textContent='CERVEAU: GROQ'; }
+  else { el.textContent='❌ Pas de Gemini - mode regex basique, moins précis'; badge.textContent='CERVEAU: REGEX'; }
+}
+function updateEmailStatus(){ const ok=localStorage.getItem('ej_s')&&localStorage.getItem('ej_t')&&localStorage.getItem('ej_k'); document.getElementById('emailBadge').textContent= ok?'EMAIL: N2 OK':localStorage.getItem('custom_api')?'EMAIL: N3':'EMAIL: MAILTO'; }
+function renderContacts(){ const c=document.getElementById('contactsList'); if(!contacts.length) c.textContent='Aucun contact - ajoute Marc'; else c.innerHTML=contacts.map((x,i)=>`${x.name} → ${x.email} <button onclick="delContact(${i})">x</button>`).join('<br>'); }
+function addContact(){ const name=document.getElementById('contactName').value.trim()||prompt('Nom'); const email=document.getElementById('contactEmail').value.trim()||prompt('Email'); if(name&&email){ contacts.push({name,email:email.toLowerCase()}); localStorage.setItem('jarvis_contacts',JSON.stringify(contacts)); renderContacts(); document.getElementById('contactName').value=''; document.getElementById('contactEmail').value=''; } }
+function delContact(i){ contacts.splice(i,1); localStorage.setItem('jarvis_contacts',JSON.stringify(contacts)); renderContacts(); }
+function addTodo(){ const v=document.getElementById('todoInput').value.trim(); if(!v) return; todos.push({text:v, date:new Date().toLocaleString()}); localStorage.setItem('jarvis_todos',JSON.stringify(todos)); document.getElementById('todoInput').value=''; renderTodos(); }
+function renderTodos(){ const el=document.getElementById('todoList'); el.textContent=todos.length? todos.map(t=>t.text).join(' | ') : 'Aucun todo'; }
+
+function unlockAudio(){ const u=new SpeechSynthesisUtterance('ok'); u.volume=0; speechSynthesis.speak(u); setTimeout(()=>speechSynthesis.cancel(),100); }
+function speak(text){
+  if(!text) return; const hour=new Date().getHours(); const night=hour>=22||hour<=6;
+  speechSynthesis.cancel(); const utter=new SpeechSynthesisUtterance(text); const voices=speechSynthesis.getVoices(); const best=voices.find(v=>v.lang.includes('fr')&&v.name.includes('Google'))||voices.find(v=>v.lang.includes('fr'))||voices[0]; if(best) utter.voice=best;
+  utter.lang='fr-FR'; utter.rate=night?0.85:1; utter.volume=night?0.6:1; orbEl.classList.add('speaking'); utter.onend=()=>orbEl.classList.remove('speaking'); speechSynthesis.speak(utter);
+}
+function toggleVoice(){ if(!listening){ unlockAudio(); setTimeout(()=>startListen(),200);} else stopListen(); }
+function startListen(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){ alert('Chrome requis'); return; }
+  recog=new SR(); recog.lang='fr-FR'; recog.continuous=false; recog.interimResults=true; listening=true; liveDot.classList.add('on'); liveLabel.textContent='MIC ON'; orbEl.classList.add('listening'); document.getElementById('pastListen').classList.add('on'); let finalT='';
+  recog.onresult=e=>{ let interim=''; for(let i=e.resultIndex;i<e.results.length;i++){ const t=e.results[i][0].transcript; if(e.results[i].isFinal) finalT+=t+' '; else interim+=t; } transEl.textContent=`"${(finalT||interim).trim()}"`; if((finalT||interim).toLowerCase().includes('stop')){ speechSynthesis.cancel(); } };
+  recog.onend=()=>{ listening=false; liveDot.classList.remove('on'); liveLabel.textContent='MIC OFF'; orbEl.classList.remove('listening'); document.getElementById('pastListen').classList.remove('on'); if(finalT.trim()) process(finalT.trim()); };
+  recog.onerror=()=>{ listening=false; liveDot.classList.remove('on'); };
+  try{recog.start();}catch{}
+}
+function stopListen(){ if(recog) try{recog.stop();}catch{} }
+
+function normalizeEmail(text){
+  let t=text.toLowerCase(); t=t.replace(/\s+at\s+/g,'@').replace(/\s+arobase\s+/g,'@').replace(/\s+point\s+/g,'.').replace(/@\s+/g,'@').replace(/\s+@/g,'@'); t=t.replace(/gmal\.com/g,'gmail.com'); return t;
+}
+
+async function understandWithGemini(text){
+  const key=localStorage.getItem('gemini_key'); if(!key) return null;
+  try{
+    document.getElementById('pastThink').classList.add('on');
+    const contactsStr=contacts.map(c=>`${c.name}:${c.email}`).join(', ')||'aucun';
+    const notes=JSON.parse(localStorage.getItem('jarvis_notes')||'[]'); const lastNote=notes.slice(-1)[0]?.text||'aucune';
+    const prompt=`Tu es JARVIS NLU français. Analyse : "${text}". Contacts: ${contactsStr}. Dernière note: ${lastNote}. Dernier draft: ${lastContext.lastDraft?lastContext.lastDraft.to:''}. Réponds UNIQUEMENT JSON valide sans markdown: {"intent":"send_email|search|note|timer|confirm_yes|confirm_no|add_ps|read_notes|fuzzy|unknown", "to": email ou nom ou null, "subject": string ou null, "body": string ou null, "query": string ou null, "minutes": number ou null}`;
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.1, maxOutputTokens:300}})});
+    const j=await res.json(); let content=j.candidates?.[0]?.content?.parts?.[0]?.text||''; console.log('Gemini raw', content); const match=content.match(/\{.*\}/s); if(match){ const parsed=JSON.parse(match[0]); document.getElementById('pastThink').classList.remove('on'); return parsed; }
+  }catch(e){ console.log('Gemini error', e); document.getElementById('pastThink').classList.remove('on'); }
+  return null;
+}
+
+async function understandWithGroq(text){
+  const key=localStorage.getItem('groq_key'); if(!key) return null;
+  try{
+    const prompt=`Extrait intent JSON. Texte: "${text}". Contacts: ${JSON.stringify(contacts)}. Réponds JSON {"intent":"send_email|search|note|timer|confirm_yes|confirm_no", "to":..., "body":...}`;
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'llama3-8b-8192', messages:[{role:'user', content:prompt}], temperature:0.1})});
+    const j=await res.json(); const content=j.choices?.[0]?.message?.content||''; const m=content.match(/\{.*\}/s); if(m) return JSON.parse(m[0]);
+  }catch(e){ console.log('Groq error', e); }
+  return null;
+}
+
+function understandRegex(text){
+  let t=normalizeEmail(text); const lower=t.toLowerCase();
+  if(/^(oui|ouais|yes|valide|envoie|confirme)/i.test(lower.trim()) && awaitingConfirm) return {intent:'confirm_yes'};
+  if(/^(non|annule|stop)/i.test(lower.trim()) && awaitingConfirm) return {intent:'confirm_no'};
+  if(lower.includes('ajoute') && lower.includes('ps') && lastContext.lastDraft) return {intent:'add_ps', body:text.split(/ps/i)[1]||text};
+  if(lower.match(/lis.*note/)) return {intent:'read_notes'};
+  if(lower.match(/le truc d'hier|truc hier/)) return {intent:'fuzzy'};
+  const emailMatch=text.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i) || t.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i);
+  if((lower.includes('envoie')||lower.includes('envoyer')) && (lower.includes('email')||lower.includes('mail')||emailMatch||contacts.some(c=>lower.includes(c.name.toLowerCase())))){
+    let to=emailMatch?emailMatch[0]:null; if(!to){ for(const c of contacts){ if(lower.includes(c.name.toLowerCase())){ to=c.email; break; } } }
+    return {intent:'send_email', to:to||'test@example.com', subject:text.slice(0,60), body:text.split(/pour dire|disant/i)[1]||text};
+  }
+  if(lower.match(/cherche|recherche/)) return {intent:'search', query:text.replace(/cherche|recherche/gi,'').trim()};
+  if(lower.match(/note|rappelle/)) return {intent:'note', text:text};
+  if(lower.match(/timer|minuteur/)){ const m=lower.match(/(\d+)\s*(minute|seconde|heure)/); const mins=m?parseInt(m[1])*(m[2].includes('heure')?60:m[2].includes('seconde')?1/60:1):2; return {intent:'timer', minutes:mins}; }
+  return {intent:'unknown', raw:text};
+}
+
+async function process(rawText){
+  const text=rawText.replace(/^jarvis\s*/i,'').trim(); if(!text) return;
+  transEl.textContent=`🗣️ "${text}" → analyse Gemini...`;
+  let res=null;
+  // 1. Essaye Gemini d'abord
+  res=await understandWithGemini(text);
+  if(res){ transEl.textContent=`🗣️ "${text}" → Gemini: ${res.intent} ${res.to||res.query||''}`; }
+  else {
+    // 2. Groq fallback
+    res=await understandWithGroq(text);
+    if(res){ transEl.textContent=`🗣️ "${text}" → Groq: ${res.intent}`; }
+    else {
+      // 3. Regex fallback
+      res=understandRegex(text);
+      transEl.textContent=`🗣️ "${text}" → Regex: ${res.intent}`;
+    }
+  }
+  // Résolution contact si to est un nom
+  if(res.to && !res.to.includes('@')){ const c=contacts.find(x=>x.name.toLowerCase().includes(res.to.toLowerCase())||res.to.toLowerCase().includes(x.name.toLowerCase())); if(c) res.to=c.email; }
+
+  if(res.intent==='confirm_yes' && awaitingConfirm==='email'){ awaitingConfirm=null; outEl.textContent='J\'envoie...'; speak('J\'envoie'); await executeReal(); return; }
+  if(res.intent==='confirm_no'){ awaitingConfirm=null; outEl.textContent='Annulé'; speak('Annulé'); document.getElementById('actionZone').innerHTML=''; return; }
+  if(res.intent==='send_email'){
+    const d={to:res.to||'test@example.com', subject:res.subject||text.slice(0,60), body:res.body||text}; lastDraft=d; lastContext.lastDraft=d; awaitingConfirm='email';
+    const msg=`Préparé pour ${d.to}, objet ${d.subject}. Je te relis : ${d.body.slice(0,120)}. Tu confirmes ? Dis oui envoie.`;
+    showAction(d); outEl.textContent=msg; speak(msg); return;
+  }
+  if(res.intent==='add_ps' && lastContext.lastDraft){ lastContext.lastDraft.body+='\n\nPS: '+res.body; outEl.textContent=`PS ajouté : ${res.body}`; speak('PS ajouté'); showAction(lastContext.lastDraft); return; }
+  if(res.intent==='read_notes'){ const notes=JSON.parse(localStorage.getItem('jarvis_notes')||'[]'); const txt=notes.slice(-3).map(n=>n.text).join('. '); outEl.textContent=txt||'Aucune note'; speak(txt||'Aucune note'); return; }
+  if(res.intent==='fuzzy'){ const notes=JSON.parse(localStorage.getItem('jarvis_notes')||'[]'); const f=notes.slice(-1)[0]; outEl.textContent=f?`Hier : ${f.text}`:'Rien trouvé'; speak(outEl.textContent); return; }
+  if(res.intent==='search'){ let r=''; const tavilyKey=localStorage.getItem('tavily_key'); if(tavilyKey){ try{ const tr=await fetch('https://api.tavily.com/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({api_key:tavilyKey, query:res.query||text, max_results:2})}); const tj=await tr.json(); r=tj.results?.[0]?.content?.slice(0,200)||'Résultat Tavily'; }catch(e){ r='Erreur Tavily'; } } else { r=await wikiSearch(res.query||text); } outEl.textContent=r; speak(r.slice(0,250)); return; }
+  if(res.intent==='note'){ const notes=JSON.parse(localStorage.getItem('jarvis_notes')||'[]'); notes.push({text:res.text||text, date:new Date().toLocaleString()}); localStorage.setItem('jarvis_notes',JSON.stringify(notes)); outEl.textContent=`Noté : ${text}`; speak('Noté'); return; }
+  outEl.textContent=`Je n'ai pas compris "${text}". Essaie "envoie à Marc pour dire bonjour" avec Gemini configuré.`; speak(outEl.textContent);
+}
+
+function showAction(d){ const z=document.getElementById('actionZone'); z.innerHTML=`<div style="background:var(--bg);border:1px solid var(--border);padding:8px;border-radius:8px"><b>DRAFT - Dis oui envoie</b><br>À: ${d.to}<br>Objet: ${d.subject}<br><div class="mono" style="margin-top:4px">${d.body.slice(0,200)}</div></div><div class="row"><button class="btn btn-p" onclick="executeReal()">✅ Oui envoie</button><button class="btn btn-g" onclick="cancelAction()">❌ Non</button></div>`; window._draft=d; }
+function cancelAction(){ awaitingConfirm=null; document.getElementById('actionZone').innerHTML=''; }
+async function executeReal(){
+  const d=window._draft; if(!d) return; const api=localStorage.getItem('custom_api'), s=localStorage.getItem('ej_s'), t=localStorage.getItem('ej_t'), k=localStorage.getItem('ej_k');
+  const file=document.getElementById('attach').files[0]; let attachment=null; if(file){ attachment=await new Promise(res=>{ const r=new FileReader(); r.onload=e=>res({name:file.name, data:e.target.result}); r.readAsDataURL(file); }); }
+  if(api){ try{ const r=await fetch(api,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:d.to, subject:d.subject, body:d.body, attachment})}); const j=await r.json(); if(j.status==='success'){ outEl.textContent='✅ Envoyé Niveau 3 à '+d.to; speak('Envoyé'); awaitingConfirm=null; } }catch(e){ outEl.textContent='Erreur API: '+e; } }
+  else if(s&&t&&k){ try{ const r=await fetch('https://api.emailjs.com/api/v1.0/email/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({service_id:s, template_id:t, user_id:k, template_params:{to_email:d.to, subject:d.subject, message:d.body}})}); if(r.ok){ outEl.textContent='✅ Envoyé EmailJS à '+d.to; speak('Envoyé à '+d.to); awaitingConfirm=null; document.getElementById('actionZone').innerHTML='<div class="help">✅ Envoyé</div>'; } else outEl.textContent='Erreur: '+await r.text(); }catch(e){ outEl.textContent='Erreur: '+e; } }
+  else { window.location.href=`mailto:${d.to}?subject=${encodeURIComponent(d.subject)}&body=${encodeURIComponent(d.body)}`; outEl.textContent='Mailto ouvert'; awaitingConfirm=null; }
+}
+async function wikiSearch(q){ try{ const url=`https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(q)}&limit=2&origin=*&format=json`; const r=await fetch(url); const d=await r.json(); return `${d[1][0]||q}: ${d[2][0]||''}`; }catch{ return 'offline'; } }
+async function testGemini(){
+  const key=localStorage.getItem('gemini_key'); if(!key){ alert('Mets ta clé Gemini d\'abord'); return; }
+  outEl.textContent='Test Gemini...'; try{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:'Dis bonjour en français, 5 mots max'}]}]})});
+    const j=await res.json(); const txt=j.candidates?.[0]?.content?.parts?.[0]?.text||'Pas de réponse'; outEl.textContent='✅ Gemini OK : '+txt; speak(txt);
+  }catch(e){ outEl.textContent='❌ Erreur Gemini: '+e; }
+}
+async function testEJ(){ const s=localStorage.getItem('ej_s'), t=localStorage.getItem('ej_t'), k=localStorage.getItem('ej_k'); if(!s||!t||!k){ alert('Configure EmailJS'); return; } const to=prompt('Email test:'); if(!to) return; try{ const r=await fetch('https://api.emailjs.com/api/v1.0/email/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({service_id:s, template_id:t, user_id:k, template_params:{to_email:to, subject:'Test V6 Gemini', message:'Test V6 OK'}})}); alert(r.ok?'Test OK':'Erreur: '+await r.text()); }catch(e){ alert('Erreur: '+e); } }
+
+function sendTxt(){ const v=document.getElementById('txt').value.trim(); if(!v) return; document.getElementById('txt').value=''; process(v); }
+document.getElementById('txt').addEventListener('keydown',e=>{if(e.key==='Enter') sendTxt();});
+loadAll();
+</script>
+</body>
+</html>
